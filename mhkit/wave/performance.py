@@ -365,3 +365,58 @@ def power_performance_workflow(S, h, P, statistic, frequency_bins=None, deep=Fal
         plt.savefig(join(savepath,'Capture Length Matrix ' + str + '.png'))
 
     return LM, maep_matrix
+
+def response_amplitude_operator(F, M, A, B, C, w, Bv=None):
+    """
+    Calculates the complex, frequency-dependent response amplitude operator 
+    of a system from its hydrodynamic properties. 
+    Only takes 1 degree of freedom at a time.
+
+    Parameters
+    ------------
+    F: numpy array or pandas Series
+        Linear excitation force complex amplitude [N or Nm]
+    M: float
+        System mass or inertia [kg or kg*m^2]
+    A: numpy array or pandas Series
+        Added mass [kg or kg*m^2]
+    B: numpy array or pandas Series
+        Radiation damping [N*s/m or Nm*s/m]
+    C: numpy array or pandas Series
+        Hydrostatic restoring force coefficients [N/m or Nm/m]
+    w: numpy array or pandas Series
+        Frequency bins of F, A, B, linear_damping [rad/s]
+    Bv: numpy array or pandas Series (optional)
+        Linearized quadratic viscous drag, expressed as a damping term 
+        [N*s/m or Nm*s/m]. Default = None.
+
+    Returns
+    ---------
+    RAO: numpy array or pandas Series
+        Complex, frequency-dependent response amplitude operator
+        
+    """
+    
+    assert isinstance(F,(np.ndarray, pd.Series)), 'F must be of type pd.Series or np.ndarray'
+    assert isinstance(M,float), 'm must be of type float'
+    assert isinstance(A,(np.ndarray, pd.Series)), 'S must be of type pd.Series or np.ndarray'
+    assert isinstance(B,(np.ndarray, pd.Series)), 'B must be of type pd.Series or np.ndarray'
+    # assert isinstance(C,(np.ndarray, pd.Series)), 'C must be of type pd.Series or np.ndarray'
+    assert isinstance(w,(np.ndarray, pd.Series)), 'w must be of type pd.Series or np.ndarray'
+    assert F.shape == A.shape == B.shape == w.shape, 'F, A, B and w must be of the same size'
+    if Bv is not None:
+        assert isinstance(Bv,(np.ndarray, pd.Series)), 'Bv must be of type pd.Series or np.ndarray'
+        assert Bv.shape == w.shape, 'Bv and w must be of the same size'
+    
+    # If linearized damping is included, combine with radiation damping
+    if Bv is not None:
+        B = B+Bv
+    
+    denom = C - (M+A)*w**2 + 1j*B*w
+    # rao_complex = F/denom
+    rao_complex = F/denom
+    rao_mag = abs(rao_complex)
+    rao_phase = np.arctan2(rao_complex.imag, rao_complex.real)
+    RAO = {'complex': rao_complex, 'magnitude': rao_mag, 'phase': rao_phase}
+
+    return RAO

@@ -124,6 +124,27 @@ class TestPerformance(unittest.TestCase):
         error = (expected-MAEP)/expected # SSE
 
         self.assertLess(error, 1e-6)
+        
+    def test_response_amplitude_operator(self):
+        # define quantities so that RAO = f
+        w = np.array([1.0, 1.2, 1.4])
+        f = np.array([7., 8., 9.,])
+        m = 5.
+        c = m*w**2 + 1
+        a = np.array([1., 2., 3.,])
+        b = a*w/1j
+        expected = f
+        rao = wave.performance.response_amplitude_operator(f, m, a, b, c, w)
+        self.assertAlmostEqual(expected, rao, 6)
+        self.assertEqual(rao.shape, (3,))
+        
+        # define quantities so that RAO = 1 
+        c = m*w**2
+        bv = f/(1j*w)
+        expected = np.array([1., 1., 1.,])
+        rao = wave.performance.response_amplitude_operator(f, m, a, b, c, w, Bv=bv)
+        self.assertAlmostEqual(expected, rao, 6)
+        self.assertEqual(rao.shape, (3,))
 
 
 if __name__ == '__main__':
