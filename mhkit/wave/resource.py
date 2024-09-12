@@ -5,7 +5,7 @@ from scipy import signal as _signal
 import pandas as pd
 import xarray as xr
 import numpy as np
-from mhkit.utils import to_numeric_array, convert_to_dataarray, convert_to_dataset
+from mhkit.utils import to_numeric_array, convert_to_dataarray, convert_to_dataset, get_dimension, reduce_dimension
 
 
 ### Spectrum
@@ -430,44 +430,35 @@ def frequency_moment(S, N, frequency_bins=None, frequency_dimension="", to_panda
     m: pandas DataFrame or xarray Dataset
         Nth Frequency Moment indexed by S.columns
     """
-    S = convert_to_dataset(S)
     if not isinstance(N, int):
         raise TypeError(f"N must be of type int. Got: {type(N)}")
     if not isinstance(to_pandas, bool):
         raise TypeError(f"to_pandas must be of type bool. Got: {type(to_pandas)}")
 
-    if frequency_dimension == "":
-        frequency_dimension = list(S.coords)[0]
-    elif frequency_dimension not in list(S.dims):
-        raise ValueError(
-            f"frequency_dimension is not a dimension of S ({list(S.dims)}). Got: {frequency_dimension}."
-        )
-    f = S[frequency_dimension]
+    S_np = to_numeric_array(S, name="S")
+    f, frequency_index = get_dimension(S, frequency_dimension)
+   
+    mask = f >= 1e-12
+    mask_nd = (mask * np.full(S_np.shape, True))
 
     # Eq 8 in IEC 62600-101
-    S = S.sel({frequency_dimension: slice(1e-12, f.max())})  # omit frequency of 0
-    f = S[frequency_dimension]  # reset frequency_dimension without the 0 frequency
+    S_np = S_np[mask_nd].reshape(S_np.shape)  # omit frequency of 0
+    f = f[mask]  # omit frequency of 0
 
     fn = np.power(f, N)
     if frequency_bins is None:
-        delta_f = f.diff(dim=frequency_dimension)
-        delta_f0 = f[1] - f[0]
-        delta_f0 = delta_f0.assign_coords({frequency_dimension: f[0]})
-        delta_f = xr.concat([delta_f0, delta_f], dim=frequency_dimension)
+        delta_f = np.diff(f, axis=frequency_index)
+        delta_f = np.insert(delta_f, 0, f[0])
     else:
-        delta_f = xr.DataArray(
-            data=convert_to_dataarray(frequency_bins),
-            dims=frequency_dimension,
-            coords={frequency_dimension: f},
-        )
+        frequency_bins = to_numeric_array(frequency_bins, name="frequency_bins")
+        delta_f = frequency_bins
 
-    m = S * fn * delta_f
-    m = m.sum(dim=frequency_dimension)
+    data = S_np * fn * delta_f
+    data = data.sum(axis=frequency_index)
 
-    m = _transform_dataset(m, "m" + str(N))
-
-    if to_pandas:
-        m = m.to_dataframe()
+    # Reduce dimension of the input format and assign the result to it
+    m = reduce_dimension(S, "m"+str(N), frequency_index, frequency_dimension)
+    m[:] = data
 
     return m
 
@@ -713,7 +704,7 @@ def energy_period(S, frequency_dimension="", frequency_bins=None, to_pandas=True
 
     Parameters
     ------------
-    S: pandas DataFrame, pandas Series, xarray DataArray, or xarray Dataset
+    S: pandas DataFrame, pandas Series, xarray DataArray
         Spectral density [m^2/Hz] indexed by frequency [Hz]
     frequency_dimension: string (optional)
         Name of the xarray dimension corresponding to frequency. If not supplied,
@@ -728,7 +719,6 @@ def energy_period(S, frequency_dimension="", frequency_bins=None, to_pandas=True
     Te: pandas DataFrame or xarray Dataset
         Wave energy period [s] indexed by S.columns
     """
-    S = convert_to_dataset(S)
     if not isinstance(to_pandas, bool):
         raise TypeError(f"to_pandas must be of type bool. Got: {type(to_pandas)}")
 
@@ -738,17 +728,18 @@ def energy_period(S, frequency_dimension="", frequency_bins=None, to_pandas=True
         frequency_bins=frequency_bins,
         frequency_dimension=frequency_dimension,
         to_pandas=False,
-    ).rename({"m-1": "Te"})
+    )
     m0 = frequency_moment(
         S,
         0,
         frequency_bins=frequency_bins,
         frequency_dimension=frequency_dimension,
         to_pandas=False,
-    ).rename({"m0": "Te"})
+    )
 
     # Eq 13 in IEC 62600-101
     Te = mn1 / m0
+    Te.name = "Te"
 
     if to_pandas:
         Te = Te.to_dataframe()

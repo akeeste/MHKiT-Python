@@ -7,7 +7,7 @@ def to_numeric_array(data, name):
     """
     Convert input data to a numeric array, ensuring all elements are numeric.
     """
-    if isinstance(data, (list, np.ndarray, pd.Series, xr.DataArray)):
+    if isinstance(data, (list, np.ndarray, pd.Series, pd.DataFrame, xr.DataArray)):
         data = np.asarray(data)
         if not np.issubdtype(data.dtype, np.number):
             raise TypeError(
@@ -163,9 +163,9 @@ def convert_to_dataarray(data, name="data"):
             index = data.index.values
             columns = data.columns.values
             data = xr.DataArray(
-                data=data.T,
-                dims=("variable", "index"),
-                coords={"variable": columns, "index": index},
+                data=data,
+                dims=("index", "variable"),
+                coords={ "index": index, "variable": columns},
             )
 
     # Checks xr.Dataset input and converts to xr.DataArray if possible
@@ -224,4 +224,55 @@ def convert_nested_dict_and_pandas(data):
         elif isinstance(data[key], dict):
             data[key] = convert_nested_dict_and_pandas(data[key])
 
+    return data
+
+def get_dimension(data, dimension_name):
+    """
+    Takes in input data of various formats and returns the dimension corresponding to a given dimension_name.
+    For pandas input, the relevant dimension if assumed to be the first
+
+    Parameters
+    ----------
+    data: pandas DataFrame, pandas Series, xarray DataArray
+        The data containing the relevant dimension.
+
+    dimension_name: str
+        The name pf the xarray DataArray dimension. Not used for pandas input.
+
+    Returns
+    -------
+    dimension_values: numpy ndarray
+        The values of the relevant dimension
+
+    dimension_index: int
+        The axis corresponding to the relevant dimension. Will be 0 for pandas input. Can vary for xarray input.
+
+    """
+    if isinstance(data, xr.DataArray):
+        if dimension_name == "":
+            dimension_name = list(data.coords)[0]
+        elif dimension_name not in list(data.dims):
+            raise ValueError(
+                f"dimension_name is not a dimension of data ({list(data.dims)}). Got: {dimension_name}."
+            )
+        dimension_values = data[dimension_name].values
+        dimension_index = data.dims.index(dimension_name)
+    else:
+        dimension_values = data.index.values
+        dimension_index = 0
+    return (dimension_values, dimension_index)
+
+def reduce_dimension(inputData, name, dimension_index, dimension_name):
+    shape = inputData.shape
+    newShape = list(shape)
+    newShape.remove(newShape[dimension_index])
+    if isinstance(inputData, pd.DataFrame):
+        data = inputData.sum(axis=dimension_index)
+        data.name = name
+    elif isinstance(inputData, pd.Series):
+        data = np.array([np.nan])
+    elif isinstance(inputData, xr.DataArray):
+        data = dimension_name[{dimension_name:0}]
+        data = data.drop_vars(dimension_name)
+        data.name = name
     return data

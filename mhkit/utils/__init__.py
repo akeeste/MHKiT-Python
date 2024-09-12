@@ -13,6 +13,8 @@ from .type_handling import (
     convert_to_dataset,
     convert_to_dataarray,
     convert_nested_dict_and_pandas,
+    get_dimension,
+    reduce_dimension,
 )
 
 _matlab = False  # Private variable indicating if mhkit is run through matlab
