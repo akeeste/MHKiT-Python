@@ -4,7 +4,7 @@ from scipy import signal as _signal
 import pandas as pd
 import xarray as xr
 import numpy as np
-from mhkit.utils import to_numeric_array, convert_to_dataarray
+from mhkit.utils import to_numeric_array, convert_to_dataarray, convert_to_dataset
 
 
 ### Spectrum
@@ -46,14 +46,14 @@ def elevation_spectrum(
 
     Returns
     ---------
-    S: pandas DataFrame or xr.Dataset
-        Spectral density [m^2/Hz] indexed by frequency [Hz]
+    S: pandas DataFrame, pandas Series, xarray DataArray, or xarray Dataset
+        Spectral density [m^2/Hz] indexed by frequency [Hz].
     """
 
     # TODO: Add confidence intervals, equal energy frequency spacing, and NDBC
     #       frequency spacing
     # TODO: may need to raise an error for the length of nnft- signal.welch breaks when nfft is too short
-    eta = convert_to_dataarray(eta)
+    eta = convert_to_dataset(eta, "eta")
     if not isinstance(sample_rate, (float, int)):
         raise TypeError(
             f"sample_rate must be of type int or float. Got: {type(sample_rate)}"
@@ -83,24 +83,26 @@ def elevation_spectrum(
     if not np.allclose(time.diff(dim=time_dimension)[1:], delta_t):
         raise ValueError(
             "Time bins are not evenly spaced. Create a constant "
-            + "temporal spacing for eta."
+            + f"temporal spacing for eta."
         )
 
-    if detrend:
-        eta = _signal.detrend(
-            eta.dropna(dim=time_dimension), axis=-1, type="linear", bp=0
+    S = xr.Dataset()
+    for var in eta.data_vars:
+        eta_subset = eta[var]
+        if detrend:
+            eta_subset = _signal.detrend(
+                eta_subset.dropna(dim=time_dimension), axis=-1, type="linear", bp=0
+            )
+        [f, wave_spec_measured] = _signal.welch(
+            eta_subset,
+            fs=sample_rate,
+            window=window,
+            nperseg=nnft,
+            nfft=nnft,
+            noverlap=noverlap,
         )
-    [f, wave_spec_measured] = _signal.welch(
-        eta,
-        fs=sample_rate,
-        window=window,
-        nperseg=nnft,
-        nfft=nnft,
-        noverlap=noverlap,
-    )
-    S = xr.DataArray(
-        data=wave_spec_measured, dims=["Frequency"], coords={"Frequency": f}
-    )
+        S[var] = (["Frequency"], wave_spec_measured)
+    S = S.assign_coords({"Frequency": f})
 
     if to_pandas:
         S = S.to_pandas()
@@ -285,15 +287,15 @@ def surface_elevation(
     Returns
     ---------
     eta: pandas DataFrame or xarray Dataset
-        Wave surface elevation [m] indexed by time [s]
+        Wave surface elevation [m] indexed by time [s].
 
     """
+    S = convert_to_dataset(S, "S")
     time_index = to_numeric_array(time_index, "time_index")
-    S = convert_to_dataarray(S)
     if not isinstance(seed, (type(None), int)):
         raise TypeError(f"If specified, seed must be of type int. Got: {type(seed)}")
     if not isinstance(phases, type(None)):
-        phases = convert_to_dataarray(phases)
+        phases = convert_to_dataset(phases)
     if not isinstance(method, str):
         raise TypeError(f"method must be of type str. Got: {type(method)}")
     if not isinstance(to_pandas, bool):
@@ -337,10 +339,11 @@ def surface_elevation(
         delta_f = f.values[1] - f.values[0]
         delta_f_even = np.allclose(f.diff(dim=frequency_dimension)[1:], delta_f)
     if phases is not None:
-        if not phases.shape == S.shape:
-            raise ValueError(
-                "shape of variables in phases must match shape of variables in S"
-            )
+        for var in phases.data_vars:
+            if not phases[var].shape == S[var].shape:
+                raise ValueError(
+                    "shape of variables in phases must match shape of variables in S"
+                )
     if method == "ifft":
         # ifft method must have a zero frequency and evenly spaced frequency bins
         if not f[0] == 0:
@@ -363,42 +366,46 @@ def surface_elevation(
         data=2 * np.pi * f, dims=frequency_dimension, coords={frequency_dimension: f}
     )
 
-    if phases is None:
-        np.random.seed(seed)
-        phase = xr.DataArray(
-            data=2 * np.pi * np.random.random_sample(S[frequency_dimension].shape),
-            dims=frequency_dimension,
-            coords={frequency_dimension: f},
-        )
-    else:
-        phase = phases
+    eta = xr.Dataset()
+    for var in S.data_vars:
+        S_subset = S[var]
+        if phases is None:
+            np.random.seed(seed)
+            phase = xr.DataArray(
+                data=2
+                * np.pi
+                * np.random.random_sample(S_subset[frequency_dimension].shape),
+                dims=frequency_dimension,
+                coords={frequency_dimension: f},
+            )
+        else:
+            phase = phases[var]
 
-    # Wave amplitude times delta f
-    A = np.sqrt(2 * S * delta_f)
+        # Wave amplitude times delta f
+        A = np.sqrt(2 * S_subset * delta_f)
 
-    if method == "ifft":
-        A_cmplx = A * (np.cos(phase) + 1j * np.sin(phase))
-        # eta_tmp = np.fft.irfft(0.5 * A_cmplx.values * time_index.size, time_index.size)
-        eta_tmp = np.fft.irfftn(
-            0.5 * A_cmplx * time_index.size,
-            list(time_index.shape),
-            axes=[frequency_axis],
-        )
-        eta = xr.DataArray(data=eta_tmp, dims=new_dims, coords=new_coords)
+        if method == "ifft":
+            A_cmplx = A * (np.cos(phase) + 1j * np.sin(phase))
+            eta_tmp = np.fft.irfftn(
+                0.5 * A_cmplx * time_index.size,
+                list(time_index.shape),
+                axes=[frequency_axis],
+            )
+            eta[var] = xr.DataArray(data=eta_tmp, dims=new_dims, coords=new_coords)
 
-    elif method == "sum_of_sines":
-        # Product of omega and time
-        B = np.outer(time_index, omega)
-        B = B.reshape((len(time_index), len(omega)))
-        B = xr.DataArray(
-            data=B,
-            dims=["Time", frequency_dimension],
-            coords={"Time": time_index, frequency_dimension: f},
-        )
+        elif method == "sum_of_sines":
+            # Product of omega and time
+            B = np.outer(time_index, omega)
+            B = B.reshape((len(time_index), len(omega)))
+            B = xr.DataArray(
+                data=B,
+                dims=["Time", frequency_dimension],
+                coords={"Time": time_index, frequency_dimension: f},
+            )
 
-        # wave elevation
-        C = np.cos(B + phase)
-        eta = (C * A).sum(dim=frequency_dimension)
+            # wave elevation
+            C = np.cos(B + phase)
+            eta[var] = (C * A).sum(dim=frequency_dimension)
 
     if to_pandas:
         eta = eta.to_pandas()
@@ -1164,7 +1171,6 @@ def wave_number(f, h, rho=1025, g=9.80665, to_pandas=True):
     """
     if isinstance(f, (int, float)):
         f = np.asarray([f])
-    # f = convert_to_dataarray(f)
     if not isinstance(h, (int, float)):
         raise TypeError(f"h must be of type int or float. Got: {type(h)}")
     if not isinstance(rho, (int, float)):
