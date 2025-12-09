@@ -5,28 +5,6 @@ in electrical power systems. These functions are designed to assist in power
 quality assessments by providing tools to analyze voltage and current signals
 for their harmonic and interharmonic components based on the guidelines and methodologies
 outlined in IEC 61000-4-7:2008 ED2 and in IEC 62600-30:2018 ED1.
-
-Functions in this module include:
-
-- harmonics: Calculates the harmonics from time series of voltage or current.
-  This function returns the amplitude of the time-series data harmonics indexed by
-  the harmonic frequency, aiding in the identification of harmonic distortions
-  within the power system.
-
-- harmonic_subgroups: Computes the harmonic subgroups as per IEC 61000-4-7 standards.
-  Harmonic subgroups provide insights into the distribution of power across
-  different harmonic frequencies, which is crucial for understanding the behavior
-  of non-linear loads and their impact on the power quality.
-
-- total_harmonic_current_distortion (THCD): Determines the total harmonic current
-  distortion, offering a summary metric that quantifies the overall level of
-  harmonic distortion present in the current waveform. This metric is essential
-  for assessing compliance with power quality standards and guidelines.
-
-- interharmonics: Identifies and calculates the interharmonics present in the
-  power system. Interharmonics, which are frequencies that occur between the
-  fundamental and harmonic frequencies, can arise from various sources and
-  potentially lead to power quality issues.
 """
 
 from typing import Union
@@ -45,6 +23,9 @@ def harmonics(
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
     Calculates the harmonics from time series of voltage or current based on IEC 61000-4-7.
+    This function returns the amplitude of the time-series data harmonics indexed by
+    the harmonic frequency, aiding in the identification of harmonic distortions
+    within the power system.
 
     Parameters
     -----------
@@ -130,7 +111,10 @@ def harmonic_subgroups(
     to_pandas: bool = True,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
-    Calculates the harmonic subgroups based on IEC 61000-4-7
+    Calculates the harmonic subgroups based on IEC 61000-4-7 standards.
+    Harmonic subgroups provide insights into the distribution of power across
+    different harmonic frequencies, which is crucial for understanding the behavior
+    of non-linear loads and their impact on the power quality.
 
     Parameters
     ----------
@@ -222,7 +206,10 @@ def total_harmonic_current_distortion(
     to_pandas: bool = True,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
-    Calculates the total harmonic current distortion (THC) based on IEC TS 62600-30
+    Calculates the total harmonic current distortion (THD) based on IEC TS 62600-30.
+    THD is a summary metric that quantifies the overall level of
+    harmonic distortion present in the current waveform. This metric is essential
+    for assessing compliance with power quality standards and guidelines.
 
     Parameters
     ----------
@@ -294,7 +281,10 @@ def interharmonics(
     to_pandas: bool = True,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
-    Calculates the interharmonics from the harmonic_amplitudes of current
+    Identifies and calculates the interharmonics present in the
+    power system. Interharmonics, which are frequencies that occur between the
+    fundamental and harmonic frequencies, can arise from various sources and
+    potentially lead to power quality issues.
 
     Parameters
     -----------

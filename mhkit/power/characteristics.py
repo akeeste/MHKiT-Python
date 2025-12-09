@@ -6,17 +6,6 @@ analysis for AC signals and power calculations for three-phase AC systems.
 The calculations can accommodate both line-to-neutral and line-to-line voltage
 measurements and offer flexibility in output formats, allowing results to be
 saved as either pandas DataFrames or xarray Datasets.
-
-Functions:
-    instantaneous_frequency: Calculates the instantaneous frequency of a measured
-    voltage signal over time.
-
-    dc_power: Computes the DC power from voltage and current measurements, providing
-    both individual channel outputs and a gross power calculation.
-
-    ac_power_three_phase: Calculates the magnitude of active AC power for three-phase
-    systems, considering the power factor and voltage measurement configuration
-    (line-to-neutral or line-to-line).
 """
 
 from typing import Union
@@ -33,7 +22,7 @@ def instantaneous_frequency(
     to_pandas: bool = True,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
-    Calculates instantaneous frequency of measured voltage
+    Calculates instantaneous frequency of a measured voltage timeseries.
 
     Parameters
     -----------
@@ -113,7 +102,8 @@ def dc_power(
     to_pandas: bool = True,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
-    Calculates DC power from voltage and current
+    Computes the DC power from voltage and current measurements, providing
+    both individual channel outputs and a gross power calculation.
 
     Parameters
     -----------
@@ -185,7 +175,9 @@ def ac_power_three_phase(
     to_pandas: bool = True,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
-    Calculates magnitude of active AC power from line to neutral voltage and current
+    Calculates the magnitude of active AC power for three-phase
+    systems, considering the power factor and voltage measurement configuration
+    (line-to-neutral or line-to-line).
 
     Parameters
     -----------
