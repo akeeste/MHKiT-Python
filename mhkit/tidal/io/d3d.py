@@ -1,6 +1,4 @@
 """
-d3d.py
-
 This module provides functions for reading, processing, and analyzing Delft3D
 data. It supports time indexing, variable interpolation, and turbulent
 intensity calculations to facilitate tidal resource assessment and modeling.

@@ -1,8 +1,7 @@
 """
-MHKiT Tidal Module
-
 The tidal module contains a set of functions to calculate
-relevant quantities of interest for tidal energy converters (TECs).
+relevant quantities of interest for tidal energy converters
+using timeseries data of velocity and direction.
 """
 
 from mhkit.tidal import graphics

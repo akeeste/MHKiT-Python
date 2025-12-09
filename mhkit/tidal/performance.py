@@ -1,11 +1,8 @@
 """
-performance.py
-
 This module provides functions for analyzing the performance of tidal energy
 devices using Acoustic Doppler Current Profiler (ADCP) data. It includes
 methods for calculating power curves, efficiency, velocity profiles, and
 other metrics relevant to marine energy devices.
-
 """
 
 from typing import Union, Optional

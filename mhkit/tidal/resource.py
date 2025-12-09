@@ -3,7 +3,6 @@ This module provides utility functions for analyzing river and tidal
 flow directions and velocities. It includes tools for determining
 principal flow directions, classifying ebb and flood cycles, and
 computing probability distributions of flow velocities.
-
 """
 
 import math

@@ -1,10 +1,7 @@
 """
-graphics.py
-
 This module provides functions for visualizing tidal resource and performance data.
 It includes tools for creating polar plots, velocity distributions, exceedance
 probability charts, and current time-series plots.
-
 """
 
 import bisect
