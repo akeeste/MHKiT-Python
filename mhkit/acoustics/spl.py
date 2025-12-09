@@ -1,19 +1,6 @@
 """
 This module contains key functions related to calculating sound pressure levels
 from sound pressure data.
-
-1. **Sound Pressure Level Calculation**:
-
-   - `sound_pressure_level`: Computes the overall sound pressure level within a frequency band
-     from mean square spectral density.
-
-2. **Frequency-Banded Sound Pressure Level**:
-
-   - `_band_sound_pressure_level`: Helper function for calculating sound pressure levels
-     over specified frequency bandwidths.
-
-   - `third_octave_sound_pressure_level` and `decidecade_sound_pressure_level`:
-     Compute sound pressure levels across third-octave and decidecade bands, respectively.
 """
 
 import numpy as np

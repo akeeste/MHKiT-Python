@@ -1,13 +1,6 @@
 """
 This module contains key functions related to calculating sound exposure levels
 from sound pressure data.
-
-1. **Sound Exposure Level Calculation**:
-
-   - `nmfs_auditory_weighting`: Computes the auditory weighting and exposure functions
-     for marine mammals based on the National Marine Fisheries Service (NMFS) guidelines.
-   - `sound_exposure_level`: Computes the sound exposure level from within a
-     specified time range.
 """
 
 import numpy as np

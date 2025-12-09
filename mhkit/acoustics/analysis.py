@@ -4,41 +4,6 @@ and analyze sound pressure data from .wav files in the frequency and time domain
 The functions herein build on each other, with a structured flow that facilitates the
 calculation of sound pressure spectral densities and banded averages based on
 input audio data.
-
-The following functionality is provided:
-
-1. **Frequency Validation and Warning**:
-
-   - `_fmax_warning`: Ensures specified maximum frequency does not exceed the Nyquist frequency,
-     adjusting if necessary to avoid aliasing.
-
-2. **Shallow Water Cutoff Frequency**:
-
-   - `minimum_frequency`: Calculates the minimum frequency cutoff based on water depth and the
-     speed of sound in water and seabed materials.
-
-3. **Spectral Density Calculations**:
-
-   - `sound_pressure_spectral_density`: Computes the mean square sound pressure spectral density
-     using FFT binning with Hanning windowing and 50% overlap.
-
-4. **Calibration**:
-
-   - `apply_calibration`: Applies calibration adjustments to the spectral density data using
-     a sensitivity curve, filling missing values as specified.
-
-5. **Spectral Density Level Calculation**:
-
-   - `sound_pressure_spectral_density_level`: Converts mean square spectral density values to
-     sound pressure spectral density levels in dB.
-
-6. **Spectral Density Aggregation**:
-
-   - `band_aggregate`: Aggregates spectral density data into fractional octave bands using
-     specified statistical methods (e.g., median, mean).
-
-   - `time_aggregate`: Aggregates spectral density data into specified time windows using
-     similar statistical methods.
 """
 
 from typing import Union, Dict, Tuple, Optional
@@ -54,7 +19,8 @@ def _fmax_warning(
     fn: Union[int, float, np.ndarray], fmax: Union[int, float, np.ndarray]
 ) -> Union[int, float, np.ndarray]:
     """
-    Checks that the maximum frequency limit isn't greater than the Nyquist frequency.
+    Checks that the maximum frequency limit isn't greater than the Nyquist frequency,
+    and adjusts if necessary to avoid aliasing.
 
     Parameters
     ----------
@@ -91,7 +57,7 @@ def minimum_frequency(
 ) -> Union[float, np.ndarray]:
     """
     Estimate the shallow water cutoff frequency based on the speed of
-    sound in the water column and the speed of sound in the seabed
+    sound in the water column and in the seabed
     material (generally ranges from 1450 - 1800 m/s)
 
     Parameters
@@ -236,7 +202,8 @@ def apply_calibration(
     fill_value: Union[float, int, np.ndarray],
 ) -> xr.DataArray:
     """
-    Applies custom calibration to spectral density values.
+    Applies calibration adjustments to the spectral density data using
+    a sensitivity curve, filling missing values as specified.
 
     Parameters
     ----------
@@ -534,7 +501,7 @@ def band_aggregate(
 ) -> xr.DataArray:
     """
     Reorganizes spectral density level frequency tensor into
-    fractional octave bands and applies a function to them.
+    fractional octave bands and applies the specified statistical function to them.
 
     Parameters
     ----------
@@ -617,7 +584,7 @@ def time_aggregate(
 ) -> xr.DataArray:
     """
     Reorganizes spectral density level frequency tensor into
-    time windows and applies a function to them.
+    time windows and applies the specified statistical function to them.
 
     If the window length is equivalent to the size of spsdl["time"],
     this function is equivalent to spsdl.<method>("time")

@@ -6,18 +6,6 @@ levels across time and frequency dimensions.
 Each plotting function leverages the flexibility of Matplotlib, allowing for passthrough
 of Matplotlib keyword arguments via ``**kwargs``, making it easy to modify plot aspects such as
 color, scale, and label formatting.
-
-Key Functions
--------------
-1. **plot_spectrogram**:
-
-   - Generates a spectrogram plot from sound pressure spectral density level data,
-     with a logarithmic frequency scale by default for improved readability of acoustic data.
-
-2. **plot_spectra**:
-
-   - Produces a spectral density plot with a log-transformed x-axis, allowing for clear
-     visualization of spectral density across frequency bands.
 """
 
 from typing import Tuple
@@ -37,6 +25,7 @@ def plot_spectrogram(
 ) -> Tuple[plt.figure, plt.Axes]:
     """
     Plots the spectrogram of the sound pressure spectral density level.
+    Uses a logarithmic frequency scale by default for improved readability of acoustic data.
 
     Parameters
     ----------
