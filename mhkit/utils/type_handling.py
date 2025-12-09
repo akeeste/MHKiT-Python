@@ -3,14 +3,6 @@ This module provides utility functions for converting various data types
 to xarray structures such as xarray.DataArray and xarray.Dataset. It also
 includes functions for handling nested dictionaries containing pandas
 DataFrames by converting them to xarray Datasets.
-
-Functions:
-----------
-- to_numeric_array: Converts input data to a numeric NumPy array.
-- convert_to_dataset: Converts pandas or xarray data structures to xarray.Dataset.
-- convert_to_dataarray: Converts various data types to xarray.DataArray.
-- convert_nested_dict_and_pandas: Recursively converts pandas DataFrames
-  in nested dictionaries to xarray Datasets.
 """
 
 from typing import Union, Dict, Any

@@ -1,28 +1,11 @@
 """
-Upcrossing Analysis Functions
-=============================
 This module contains a collection of functions that facilitate upcrossing
 analyses.
 
-Key Functions:
---------------
-- `upcrossing`: Finds the zero upcrossing points.
-- `peaks`: Finds the peaks between zero crossings.
-- `troughs`: Finds the troughs between zero crossings.
-- `heights`: Calculates the height between zero crossings.
-- `periods`: Calculates the period between zero crossings.
-- `custom`: Applies a custom, user-defined function between zero crossings.
-
-Author:
+Authors:
 -------
 mbruggs
 akeeste
-
-Date:
------
-2023-10-10
-
-
 """
 
 from typing import Callable, Optional

@@ -5,14 +5,6 @@ mean, max, min, and standard deviation over specific windows, as well as functio
 for vector/directional statistics. The module also provides utility functions
 to unwrap vectors, compute magnitudes and phases in 2D/3D, and calculate
 the root mean squared values of vector components.
-
-Functions:
-----------
-- get_statistics: Calculates statistics for continuous data.
-- vector_statistics: Calculates vector mean and standard deviation.
-- unwrap_vector: Unwraps vector data to fall within a 0-360 degree range.
-- magnitude_phase: Computes magnitude and phase for 2D or 3D data.
-- unorm: Computes root mean squared value of 3D vectors.
 """
 
 from typing import List, Dict, Optional, Tuple, Union
@@ -193,7 +185,7 @@ def vector_statistics(
 
 def unwrap_vector(data: Union[pd.Series, np.ndarray, list]) -> np.ndarray:
     """
-    Function used to unwrap vectors into 0-360 deg range
+    Unwraps vector data to a 0-360 degree range.
 
     Parameters
     ------------
@@ -235,7 +227,7 @@ def magnitude_phase(
     Tuple[Union[float, np.ndarray], Union[float, np.ndarray], Union[float, np.ndarray]],
 ]:
     """
-    Retuns magnitude and phase in two or three dimensions.
+    Retuns magnitude and phase for 2D or 3D data.
 
     Parameters
     ----------

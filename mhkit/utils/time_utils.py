@@ -1,11 +1,6 @@
 """
 This module provides utility functions for converting datetime formats
 from MATLAB and Excel to Python datetime formats.
-
-Functions:
-----------
-- matlab_to_datetime: Converts MATLAB datenum format to Python datetime.
-- excel_to_datetime: Converts Excel datenum format to Python datetime.
 """
 
 from typing import Union
@@ -21,7 +16,7 @@ def matlab_to_datetime(
     matlab_datenum: Union[np.ndarray, list, float, int],
 ) -> pd.DatetimeIndex:
     """
-    Convert MATLAB datenum format to Python datetime
+    Converts MATLAB datenum format to Python datetime
 
     Parameters
     ------------
