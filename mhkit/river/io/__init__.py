@@ -1,6 +1,5 @@
 """
-This module provides input/output functionality for river energy related data in MHKiT.
-
+This module contains the functionality to load USGS discharge and Delft3D data.
 """
 
 from mhkit.river.io import usgs

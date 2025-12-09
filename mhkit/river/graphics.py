@@ -1,6 +1,5 @@
 """
-The graphics module provides plotting utilities for river energy resource data.
-
+The graphics submodule contains functions to plot river resource data and related metrics.
 """
 
 from typing import Union, Optional

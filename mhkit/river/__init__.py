@@ -1,6 +1,5 @@
 """
 The river module provides tools and utilities for analyzing river energy resources.
-
 """
 
 from mhkit.river import performance
