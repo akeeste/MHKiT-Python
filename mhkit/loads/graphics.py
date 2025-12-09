@@ -1,17 +1,6 @@
 """
 This module provides functionalities for plotting statistical data
 related to a given variable or dataset.
-
-    - `plot_statistics` is designed to plot raw statistical measures
-      (mean, maximum, minimum, and optional standard deviation) of a
-      variable across a series of x-axis values. It allows for
-      customization of plot labels, title, and saving the plot to a file.
-
-    - `plot_bin_statistics` extends these capabilities to binned data,
-      offering a way to visualize binned statistics (mean, maximum, minimum)
-      along with their respective standard deviations. This function also
-      supports label and title customization, as well as saving the plot to
-      a specified path.
 """
 
 from typing import Optional, Dict, Any
@@ -31,7 +20,9 @@ def plot_statistics(
     **kwargs: Dict[str, Any],
 ) -> plt.Axes:
     """
-    Plot showing standard raw statistics of variable
+    Plot standard raw statistical measures of a variable
+    across a series of x-axis values. It allows for
+    customization of plot labels, title, and saving the plot to a file.
 
     Parameters
     -----------

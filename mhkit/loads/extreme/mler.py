@@ -1,18 +1,7 @@
 """
 This module provides functionalities to calculate and analyze Most
 Likely Extreme Response (MLER) coefficients for wave energy converter
-design and risk assessment. It includes functions to:
-
-  - Calculate MLER coefficients (`mler_coefficients`) from a sea state
-    spectrum and a response Amplitude Response Operator (ARO).
-  - Define and manipulate simulation parameters (`mler_simulation`) used
-    across various MLER analyses.
-  - Renormalize the incoming amplitude of the MLER wave
-    (`mler_wave_amp_normalize`) to match the desired peak height for more
-    accurate modeling and analysis.
-  - Export the wave amplitude time series (`mler_export_time_series`)
-    based on the calculated MLER coefficients for further analysis or
-    visualization.
+design and risk assessment.
 """
 
 from typing import Union, List, Optional, Dict, Any
@@ -90,7 +79,7 @@ def mler_coefficients(
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
     Calculate MLER (most likely extreme response) coefficients from a
-    sea state spectrum and a response RAO.
+    sea state spectrum and a Response Amplitude Operator (RAO).
 
     Parameters
     ----------
@@ -371,7 +360,7 @@ def mler_export_time_series(
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """
     Generate the wave amplitude time series at X0 from the calculated
-    MLER coefficients
+    MLER coefficients.
 
     Parameters
     ----------

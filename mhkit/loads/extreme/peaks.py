@@ -3,26 +3,6 @@ This module provides utilities for analyzing wave data, specifically
 for identifying significant wave heights and estimating wave peak
 distributions using statistical methods.
 
-Functions:
-- _calculate_window_size: Calculates the window size for peak
-  independence using the auto-correlation function of wave peaks.
-- _peaks_over_threshold: Identifies peaks over a specified
-  threshold and returns independent storm peak values adjusted by
-  the threshold.
-- global_peaks: Identifies global peaks in a zero-centered
-  response time-series based on consecutive zero up-crossings.
-- number_of_short_term_peaks: Estimates the number of peaks within a
- specified short-term period.
-- peaks_distribution_weibull: Estimates the peaks distribution by
- fitting a Weibull distribution to the peaks of the response.
-- peaks_distribution_weibull_tail_fit: Estimates the peaks distribution
- using the Weibull tail fit method.
-- automatic_hs_threshold: Determines the best significant wave height
- threshold for the peaks-over-threshold method.
-- peaks_distribution_peaks_over_threshold: Estimates the peaks
- distribution using the peaks over threshold method by fitting a
- generalized Pareto distribution.
-
 References:
 - Neary, V. S., S. Ahn, B. E. Seng, M. N. Allahdadi, T. Wang, Z. Yang,
  and R. He (2020). "Characterization of Extreme Wave Conditions for
@@ -43,7 +23,7 @@ from mhkit.utils import upcrossing
 
 def _calculate_window_size(peaks: NDArray[np.float64], sampling_rate: float) -> float:
     """
-    Calculate the window size for independence based on the auto-correlation function.
+    Calculate the window size for peak independence based on the auto-correlation function of wave peaks.
 
     Parameters
     ----------
@@ -125,7 +105,6 @@ def _peaks_over_threshold(
 def global_peaks(time: np.ndarray, data: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Find the global peaks of a zero-centered response time-series.
-
     The global peaks are the maxima between consecutive zero
     up-crossings.
 
@@ -173,7 +152,7 @@ def global_peaks(time: np.ndarray, data: np.ndarray) -> Tuple[np.ndarray, np.nda
 
 def number_of_short_term_peaks(n_peaks: int, time: float, time_st: float) -> float:
     """
-    Estimate the number of peaks in a specified period.
+    Estimate the number of peaks in a specified short-term period.
 
     Parameters
     ----------
